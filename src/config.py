@@ -2,13 +2,19 @@
 TRAIN_PROP = 0.8 # proportion of train data compared to dev data
 MULTICLASS_LABELS = True
 SINGLECLASS_LABELS = False
-Y_MULTICLASS_INDEXES = [0,6] # position of multi-label classification labels in data CSV
-Y_SINGLECLASS_INDEXES = [6,12] # position of single-label classification labels in data CSV
-X_STARTINDEX = 12 # starting position of elements in data CSV
+
+# position of multi-label classification labels in data CSV
+Y_MULTI_START = 0
+Y_MULTI_END = 6
+# position of single-label classification labels in data CSV
+Y_SINGLE_START = 6
+Y_SINGLE_END = 12
+# starting position of elements in data CSV
+X_STARTINDEX = 12 
 
 # LEARNING HYPERPARAMETERS
-ITERATIONS = 500
-ALPHA = 0.1
+ITERATIONS = 200
+ALPHA = 0.3
 
 # NEURON NETWORK
-SIZE_LAYER1 = 48
+SIZE_LAYER1 = 30

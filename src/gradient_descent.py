@@ -1,6 +1,6 @@
 import numpy as np
 import config
-from utils.math_utils import sigmoid, reLu, reLu_deriv
+from utils.math_utils import sigmoid, reLu, reLu_deriv, softmax
 
 
 def init_params(num_inputs:int, num_outputs:int, size_layer1:int):
@@ -15,8 +15,17 @@ def forward_prop(w1, b1, w2, b2, X):
     z1 = w1.dot(X) + b1
     a1 = reLu(z1)
     z2 = w2.dot(a1) + b2
-    a2 = sigmoid(z2)
+    #output_note = sigmoid(z2[config.Y_MULTI_START:config.Y_MULTI_END]) if config.MULTICLASS_LABELS else np.empty((0,z2.shape[1]))
+    #output_fret1 = softmax(z2[config.Y_SINGLE_START:config.Y_SINGLE_END]) if config.SINGLECLASS_LABELS else np.empty((0,z2.shape[1]))
+    a2 = np.concatenate((sigmoid(z2[config.Y_MULTI_START:config.Y_MULTI_END]) if config.MULTICLASS_LABELS else np.empty((0,z2.shape[1])),
+                         softmax(z2[config.Y_SINGLE_START:config.Y_SINGLE_END]) if config.SINGLECLASS_LABELS else np.empty((0,z2.shape[1]))))
     return z1, a1, z2, a2
+
+
+def one_hot_y(Y):
+    Y_note = Y[config.Y_MULTI_START:config.Y_MULTI_END] if config.MULTICLASS_LABELS else np.empty((0,1))
+    Y_fret1 = np.zeros((Y.size, 25))
+    Y_fret1[np.arange(Y.size), Y] = 1  
 
 
 def backward_prop(z1:np.ndarray, a1:np.ndarray, z2:np.ndarray, a2:np.ndarray, w2:np.ndarray, X:np.ndarray, Y:np.ndarray):
@@ -39,7 +48,8 @@ def updata_params(w1, b1, w2, b2, dW1, db1, dW2, db2, alpha):
 
 
 def get_predictions(a2):
-    return (a2 >= 0.5).astype(int)
+    return np.concatenate(((a2 >= 0.5).astype(int) if config.MULTICLASS_LABELS else np.empty((0,a2.shape[1])),
+                           np.argmax(a2, 0) if config.SINGLECLASS_LABELS else np.empty((0,a2.shape[1]))))
     #return np.argmax(a2, 0)
 
 
@@ -48,7 +58,9 @@ def get_accuracy(predictions, Y):
 
 
 def gradient_descent(X,Y, iterations, alpha):
-    w1, b1, w2, b2 = init_params(X.shape[0], Y.shape[0], config.SIZE_LAYER1)
+    num_outputs = (config.Y_MULTI_START - config.Y_MULTI_END) if config.MULTICLASS_LABELS else 0 + ((config.Y_SINGLE_START-config.Y_SINGLE_END)*24) if config.SINGLECLASS_LABELS else 0
+    w1, b1, w2, b2 = init_params(X.shape[0], num_outputs, config.SIZE_LAYER1)
+    
     for i in range(iterations):
         z1, a1, z2, a2 = forward_prop(w1, b1, w2, b2, X)
         dW1, db1, dW2, db2 = backward_prop(z1, a1, z2, a2, w2, X, Y)

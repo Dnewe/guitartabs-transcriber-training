@@ -6,24 +6,26 @@ from utils.fs_io import create_dir, write_ndarray_to_csv, write_lines_to_textfil
 
 
 def create_modeldir(input:str, outdir:str):
-    modeldir = os.path.join(outdir, os.path.basename(input).replace('.csv',''))
+    modeldir = os.path.join(outdir, "model_" + os.path.basename(input).replace('.csv','').replace('data_',''))
     create_dir(modeldir)
     return modeldir
 
 
 def write_modelcsvfiles(modeldir:str, **kwargs):
     for key, value in kwargs.items():
-        write_ndarray_to_csv(os.path.join(modeldir, f"model_{key}.csv"), value)
+        write_ndarray_to_csv(os.path.join(modeldir, f"{key}.csv"), value)
 
 
-def write_configtxt(modeldir:str):
+def write_infotxt(modeldir:str, acc:float):
     configtxt = [f'Train data: {config.TRAIN_PROP*100}%',
                  f'',
                  f'Iterations: {config.ITERATIONS}',
                  f'Alpha: {config.ALPHA}',
                  f'',
-                 f'Layer1 size: {config.SIZE_LAYER1}']
-    write_lines_to_textfile(os.path.join(modeldir, 'config.txt'), configtxt)
+                 f'Layer1 size: {config.SIZE_LAYER1}',
+                 f'',
+                 f'Accuracy on test data: {round(acc,4)*100}%']
+    write_lines_to_textfile(os.path.join(modeldir, 'info.txt'), configtxt)
 
 
 def run(args):
@@ -38,9 +40,10 @@ def run(args):
 
     print("Finished training")
     _,_,_,a2 = forward_prop(w1,b1,w2,b2, X_dev)
-    print(f"Accuracy on test set: {get_accuracy(get_predictions(a2), Y_dev)}")
+    test_accuracy = get_accuracy(get_predictions(a2), Y_dev)
+    print(f"Accuracy on test set: {test_accuracy}")
 
     print("Writing model data..")
     modeldir = create_modeldir(datacsv_path, outdir_path)
     write_modelcsvfiles(modeldir, W1=w1, b1=b1, W2=w2, b2=b2)
-    write_configtxt(modeldir)
+    write_infotxt(modeldir, test_accuracy)

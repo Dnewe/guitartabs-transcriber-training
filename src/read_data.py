@@ -1,3 +1,4 @@
+import math
 import pandas as pd
 import numpy as np
 import config
@@ -5,13 +6,9 @@ import config
 
 def read_data(datacsv_path:str):
     # config parameters
-    y_multi_start = config.Y_MULTICLASS_INDEXES[0]
-    y_multi_end = config.Y_MULTICLASS_INDEXES[1]
-    y_single_start = config.Y_SINGLECLASS_INDEXES[0]
-    y_single_end = config.Y_SINGLECLASS_INDEXES[1]
+    y_start = min(config.Y_MULTI_START if config.MULTICLASS_LABELS else math.inf, config.Y_SINGLE_START if config.SINGLECLASS_LABELS else math.inf)
+    y_end = max(config.Y_MULTI_END if config.MULTICLASS_LABELS else 0, config.Y_SINGLE_END if config.SINGLECLASS_LABELS else 0)
     x_start = config.X_STARTINDEX
-
-    y_start = min(config.Y_MULTICLASS_INDEXES[0], config.Y_SINGLECLASS_INDEXES[0])
 
     # read data
     df = pd.read_csv(datacsv_path)
@@ -24,11 +21,11 @@ def read_data(datacsv_path:str):
     # separate data
         # dev
     data_dev = data[0:((int) ((1-config.TRAIN_PROP)*m))].T
-    Y_dev = data_dev[y_multi_start:y_multi_end]
+    Y_dev = data_dev[y_start:y_end]
     X_dev = data_dev[x_start:n]
         # train
     data_train = data[((int) ((config.TRAIN_PROP)*m)):m].T
-    Y_train = data_train[y_multi_start:y_multi_end]
+    Y_train = data_train[y_start:y_end]
     X_train = data_train[x_start:n]
 
     return Y_dev, X_dev, Y_train, X_train
