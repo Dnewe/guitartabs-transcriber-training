@@ -7,9 +7,9 @@ MAX_POSITION = 14
 
 # position of multi-label classification labels in data CSV
 Y_START = 0
-Y_END = 12
+Y_END = 6
 # starting position of elements in data CSV
-X_STARTINDEX = 12
+X_STARTINDEX = 6
 
 # LEARNING HYPERPARAMETERS
 ITERATIONS = 10000
