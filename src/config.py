@@ -1,20 +1,25 @@
+import seaborn as sns
+
+
 # DATA
-TRAIN_PROP = 0.8 # proportion of train data compared to dev data
-MULTICLASS_LABELS = True
-SINGLECLASS_LABELS = False
+TRAIN_PROP = 0.02 # proportion of train data compared to dev data
+MAX_POSITION = 14
 
 # position of multi-label classification labels in data CSV
-Y_MULTI_START = 0
-Y_MULTI_END = 6
-# position of single-label classification labels in data CSV
-Y_SINGLE_START = 6
-Y_SINGLE_END = 12
+Y_START = 0
+Y_END = 12
 # starting position of elements in data CSV
-X_STARTINDEX = 12 
+X_STARTINDEX = 12
 
 # LEARNING HYPERPARAMETERS
-ITERATIONS = 200
-ALPHA = 0.3
+ITERATIONS = 10000
+ALPHA = 0.01
 
 # NEURON NETWORK
-SIZE_LAYER1 = 30
+SIZE_LAYER1 = 100
+
+# OTHERS
+SHOW_ACCURACY_TIME = 20
+
+# PLOT CONFIG
+sns.set_theme(style="darkgrid")

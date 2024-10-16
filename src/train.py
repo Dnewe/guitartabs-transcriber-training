@@ -13,6 +13,7 @@ def create_modeldir(input:str, outdir:str):
 
 def write_modelcsvfiles(modeldir:str, **kwargs):
     for key, value in kwargs.items():
+        print(f"shape {key}: {value.shape}")
         write_ndarray_to_csv(os.path.join(modeldir, f"{key}.csv"), value)
 
 
@@ -36,14 +37,18 @@ def run(args):
     Y_dev, X_dev, Y_train, X_train = read_data(datacsv_path)
 
     print("Training..")
-    w1, b1, w2, b2 = gradient_descent(X_train, Y_train, config.ITERATIONS, config.ALPHA)
+    w1, b1, w2, b2, dynLinePlot = gradient_descent(X_train, Y_train, config.ITERATIONS, config.ALPHA)
 
     print("Finished training")
     _,_,_,a2 = forward_prop(w1,b1,w2,b2, X_dev)
-    test_accuracy = get_accuracy(get_predictions(a2), Y_dev)
-    print(f"Accuracy on test set: {test_accuracy}")
+    acc = get_accuracy(get_predictions(a2, Y_dev), Y_dev)
+    print(f"Accuracy on test set: {round(acc,4)*100}% (size of test set: {Y_dev.shape[1]})")
+
+    modeldir = create_modeldir(datacsv_path, outdir_path)
+
+    print('Saving Image..')
+    dynLinePlot.save(os.path.join(modeldir,'acc_vs_it.png'))
 
     print("Writing model data..")
-    modeldir = create_modeldir(datacsv_path, outdir_path)
     write_modelcsvfiles(modeldir, W1=w1, b1=b1, W2=w2, b2=b2)
-    write_infotxt(modeldir, test_accuracy)
+    write_infotxt(modeldir, acc)

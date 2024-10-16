@@ -12,7 +12,8 @@
             "console": "integratedTerminal",
             "args": [
                 "--input",
-                "h:/Documents/projets/GuitarTabsML/data_processed/Reworked/Classic/data_Classic.csv",
+                "h:/Documents/projets/GuitarTabsML/data_processed/ReworkedNoteOctave/Classic/data_Classic.csv",
+                //"h:/Documents/projets/GuitarTabsML/data_processed/ReworkedNoteOctave/temp/data_Test.csv",
                 "--output",
                 "h:/Documents/projets/GuitarTabsML/models",
             ]

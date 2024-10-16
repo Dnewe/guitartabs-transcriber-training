@@ -12,8 +12,7 @@ def create_dir(dirpath:str) -> None:
 
 
 def write_ndarray_to_csv(csvpath: str, data: np.ndarray) -> None:
-    df = pd.DataFrame(data)
-    df.to_csv(csvpath)
+    np.savetxt(csvpath, data, delimiter=',', fmt='%f')
 
 
 def write_lines_to_textfile(filepath:str, lines:List[str]) -> None:
