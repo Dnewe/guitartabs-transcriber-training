@@ -41,7 +41,7 @@ def run(args):
 
     print("Finished training")
     _,_,_,a2 = forward_prop(w1,b1,w2,b2, X_dev)
-    acc = get_accuracy(get_predictions(a2, Y_dev), Y_dev)
+    acc = get_accuracy(get_predictions(a2), Y_dev)
     print(f"Accuracy on test set: {round(acc,4)*100}% (size of test set: {Y_dev.shape[1]})")
 
     modeldir = create_modeldir(datacsv_path, outdir_path)
