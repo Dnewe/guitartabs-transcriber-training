@@ -11,7 +11,7 @@ def parse_arguments():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('-i', '--input', type=str, required=True, 
-                        help='Path in the filesystem to a directory where data CSV file is located.')
+                        help='Path in the filesystem to a directory where data and metadata CSV files are located.')
     parser.add_argument('-o', '--output', type=str, required=True,
                         help='Path in the filesystem to a directory where processed model data will be exported.')
 
@@ -22,7 +22,7 @@ def check_parameters(args):
     '''
     Check if parameters are valid
     '''
-    if not os.path.isfile(args.input):
+    if not os.path.isdir(args.input):
         print(f"Error: Input file '{args.input}' does not exist.")
         sys.exit(1)
     

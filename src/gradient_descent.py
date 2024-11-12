@@ -1,8 +1,14 @@
 import numpy as np
-import config
+from config.dataConfig import DataConfig
+from config.modelConfig import ModelConfig
+from config.displayConfig import DisplayConfig
 from utils.math_utils import reLu, reLu_deriv, leaky_relu_deriv, softmax
 from utils.color import green_str, red_str, gray_str, yellow_str
 from utils.plots.dynamicLinePlot import DynamicLinePlot
+
+dataconfig = DataConfig()
+modelconfig = ModelConfig()
+displayconfig = DisplayConfig()
 
 
 def init_params(num_inputs:int, num_outputs:int, size_layer1:int):
@@ -16,10 +22,11 @@ def init_params(num_inputs:int, num_outputs:int, size_layer1:int):
 
 def forward_prop(W1, b1, W2, b2, X):
     Z1 = W1.dot(X) + b1
+    print(f"Z1:{Z1.shape} , W1:{W1.shape}, X:{X.shape}, b1:{b1.shape}")
     A1 = reLu(Z1)
     Z2 = W2.dot(A1) + b2
-    A2_strings = np.concatenate([softmax(Z2[(config.STRINGS*i):(config.STRINGS*(i+1))]) for i in range(config.STRINGS)])
-    A2_positions = np.concatenate([softmax(Z2[(config.STRINGS**2 + config.MAX_POSITION*i):(config.STRINGS**2 + config.MAX_POSITION*(i+1))]) for i in range(config.STRINGS)])
+    A2_strings = np.concatenate([softmax(Z2[(dataconfig.STRINGS*i):(dataconfig.STRINGS*(i+1))]) for i in range(dataconfig.STRINGS)])
+    A2_positions = np.concatenate([softmax(Z2[(dataconfig.STRINGS**2 + dataconfig.POSITIONS*i):(dataconfig.STRINGS**2 + dataconfig.POSITIONS*(i+1))]) for i in range(dataconfig.STRINGS)])
     A2 = np.concatenate((A2_strings, A2_positions))
     return Z1, A1, Z2, A2
 
@@ -27,12 +34,12 @@ def forward_prop(W1, b1, W2, b2, X):
 def one_hot(Y:np.ndarray) -> np.ndarray:
     nrow = Y.shape[1]
     one_hot_Y = np.empty((nrow,0))
-    for i in config.Y_strings:
-        one_hot_Y_string_i = np.zeros((nrow, config.STRINGS))
+    for i in dataconfig.Y_STRINGS:
+        one_hot_Y_string_i = np.zeros((nrow, dataconfig.STRINGS))
         one_hot_Y_string_i[np.arange(nrow), Y[i] -1] = 1
         one_hot_Y= np.concatenate((one_hot_Y, one_hot_Y_string_i), axis=1)
-    for i in config.Y_positions: #range(config.STRINGS, config.STRINGS*2):
-        one_hot_Y_pos_i = np.zeros((nrow, config.MAX_POSITION))
+    for i in dataconfig.Y_POSITIONS: #range(config.STRINGS, config.STRINGS*2):
+        one_hot_Y_pos_i = np.zeros((nrow, dataconfig.POSITIONS))
         one_hot_Y_pos_i[np.arange(nrow), Y[i] -1] = 1
         one_hot_Y= np.concatenate((one_hot_Y, one_hot_Y_pos_i), axis=1)
     one_hot_Y = one_hot_Y.T
@@ -40,13 +47,13 @@ def one_hot(Y:np.ndarray) -> np.ndarray:
 
 
 def mask(Y:np.ndarray) -> np.ndarray:
-    mask_Y = np.zeros((Y.shape[1],(config.STRINGS+config.MAX_POSITION)*config.STRINGS)).T
+    mask_Y = np.zeros((Y.shape[1],(dataconfig.STRINGS+dataconfig.POSITIONS)*dataconfig.STRINGS)).T
     mask_indices = np.argwhere(Y != 0)  # Get indices where Y is not zero
     for i, j in mask_indices:
-        if i in config.Y_strings:
-            mask_Y[config.STRINGS*i : config.STRINGS*(i+1), j] = 1  # Set consecutive indices of strings to 1
-        if i in config.Y_positions:
-            mask_Y[config.STRINGS**2 + config.MAX_POSITION*(i-config.STRINGS) : config.STRINGS**2 + config.MAX_POSITION*(i-config.STRINGS+1), j] = 1  # Set consecutive indices of positions to 1
+        if i in dataconfig.Y_STRINGS:
+            mask_Y[dataconfig.STRINGS*i : dataconfig.STRINGS*(i+1), j] = 1  # Set consecutive indices of strings to 1
+        if i in dataconfig.Y_POSITIONS:
+            mask_Y[dataconfig.STRINGS**2 + dataconfig.POSITIONS*(i-dataconfig.STRINGS) : dataconfig.STRINGS**2 + dataconfig.POSITIONS*(i-dataconfig.STRINGS+1), j] = 1  # Set consecutive indices of positions to 1
     return mask_Y
 
 
@@ -72,17 +79,17 @@ def updata_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha):
 
 
 def get_predictions(A2):
-    pred_strings = np.array([np.argmax(A2[(config.STRINGS*i):(config.STRINGS*(i+1))], 0) + 1
-                                 for i in range(config.STRINGS)])
-    pred_positions = np.array([np.argmax(A2[(config.STRINGS**2 + config.MAX_POSITION*i):(config.STRINGS**2 + config.MAX_POSITION*(i+1))], 0)+ 1 
-                                   for i in range(config.STRINGS)])
+    pred_strings = np.array([np.argmax(A2[(dataconfig.STRINGS*i):(dataconfig.STRINGS*(i+1))], 0) + 1
+                                 for i in range(dataconfig.STRINGS)])
+    pred_positions = np.array([np.argmax(A2[(dataconfig.STRINGS**2 + dataconfig.POSITIONS*i):(dataconfig.STRINGS**2 + dataconfig.POSITIONS*(i+1))], 0)+ 1 
+                                   for i in range(dataconfig.STRINGS)])
     return np.concatenate((pred_strings, pred_positions))
 
 
 def get_accuracy(pred, Y):
     for n in range(20):
         print(f"pred{str(n).zfill(2)} : [", end='')
-        for i in (config.Y_strings + config.Y_positions):
+        for i in (dataconfig.Y_STRINGS + dataconfig.Y_POSITIONS):
             print(gray_str(pred[i][n] if Y[i][n]==0 else (green_str((pred[i][n])) if pred[i][n]==Y[i][n] else red_str(pred[i][n]))), end= ' ')
         print(']', end='  ')
         print()
@@ -92,15 +99,15 @@ def get_accuracy(pred, Y):
 
 def gradient_descent(X,Y, iterations, alpha):
     dynLinePlot = DynamicLinePlot('Variables vs. Iteration', 'Iteration', 'Proportion')
-    num_outputs = config.STRINGS * (config.MAX_POSITION+config.STRINGS)
-    W1, b1, W2, b2 = init_params(X.shape[0], num_outputs, config.SIZE_LAYER1)
+    num_outputs = dataconfig.STRINGS * (dataconfig.POSITIONS+dataconfig.STRINGS)
+    W1, b1, W2, b2 = init_params(X.shape[0], num_outputs, modelconfig.SIZE_LAYER1)
     
     prevacc = 0
     for i in range(iterations):
         Z1, A1, Z2, A2 = forward_prop(W1, b1, W2, b2, X)
         dW1, db1, dW2, db2, error_sum = backward_prop(Z1, A1, Z2, A2, W2, X, Y)
         W1, b1, W2, b2 = updata_params(W1, b1, W2, b2, dW1, db1, dW2, db2, alpha)
-        if (i % config.SHOW_ACCURACY_TIME == 0):
+        if (i % displayconfig.SHOW_ACCURACY_TIME == 0):
             acc = get_accuracy(get_predictions(A2), Y)
             err = round((error_sum/Y.shape[1])/12, 5)
             
