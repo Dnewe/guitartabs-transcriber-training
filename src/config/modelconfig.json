@@ -1,0 +1,7 @@
+{
+    "size_layer1": 48,
+    "train_prop": 0.02,
+    "iterations": 5000,
+    "alpha": 0.01
+    
+}
