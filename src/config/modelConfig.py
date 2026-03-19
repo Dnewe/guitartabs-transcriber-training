@@ -8,7 +8,7 @@ class ModelConfig:
     LAYERS:Dict[str,List[str]]
     TRAIN_SIZE:int
     VAL_SIZE:int
-    ITERATIONS:int
+    EPOCHS:int
     ALPHA:float
     BATCH_SIZE:int
     EARLYSTOP_PATIENCE:int

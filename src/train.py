@@ -27,7 +27,7 @@ def train(X_train:np.ndarray, y_train:np.ndarray,
           X_val:np.ndarray, y_val:np.ndarray, 
           epochs:int):
     
-    dynLinePlot = DynamicLinePlot('Variables vs. Iteration', 'Iteration', 'Proportion')
+    dynLinePlot = DynamicLinePlot('Variables vs. Epoch', 'Epoch', 'Proportion')
 
     model = NeuralNetwork(modelconfig.LAYERS, modelconfig.ALPHA, modelconfig.MOMENTUM)
 
@@ -74,8 +74,8 @@ def train(X_train:np.ndarray, y_train:np.ndarray,
         end_time = time.time()
         hours, minutes, seconds = get_eta(start_time, end_time, epochs, i)
 
-        print(f"\n\nIterations: {i}")
-        print(f"Time per iteration: {round((end_time-start_time)/display_delay,3)}s ; ETA: {hours}h {minutes}m {seconds}s")
+        print(f"\n\nEpoch: {i}")
+        print(f"Time per epoch: {round((end_time-start_time)/display_delay,3)}s ; ETA: {hours}h {minutes}m {seconds}s")
         print(f"TRAIN: Accuracy [note|beat]: [{yellow_str(round(acc_train_n,4))} | {yellow_str(round(acc_train_b,4))}]  | Loss: {yellow_str(round(loss_train,4))}")
         print(f"VAL  : Accuracy [note|beat]: [{yellow_str(round(acc_val_n,4))} | {yellow_str(round(acc_val_b,4))}]  | Loss: {yellow_str(round(loss_val,4))}")
         dynLinePlot.update(i, {'acc_train':acc_train_n,'acc_val':acc_val_n, 'loss_train':loss_train, 'loss_val':loss_val}, (best_epoch, best_loss))

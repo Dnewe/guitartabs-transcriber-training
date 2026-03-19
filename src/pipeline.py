@@ -23,7 +23,7 @@ def run(args):
     modelconfig.STD = train_std
 
     print("Training..")
-    model, dynLinePlot = train(X_train, y_train, X_val, y_val, modelconfig.ITERATIONS)
+    model, dynLinePlot = train(X_train, y_train, X_val, y_val, modelconfig.EPOCHS)
 
     print("Finished training")
     acc, loss = test(model, X_test, y_test)
